@@ -24,7 +24,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="glshapetests.py" />
     <Compile Include="SimulationTest.py" />
+    <Compile Include="vpython_test.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="{e05efde2-2fdd-44f1-94a6-b731ec800655}\2.7" />
