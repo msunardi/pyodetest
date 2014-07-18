@@ -6,6 +6,14 @@ from OpenGL.GLUT import *
 import ode
 import numpy as np
 
+# rotation directions are named by the third (z-axis) row of the 3x3 matrix,
+#   because ODE capsules are oriented along the z-axis
+rightRot = (0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0)
+leftRot = (0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0)
+upRot = (1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0, 0.0)
+downRot = (1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0, 0.0)
+bkwdRot = (1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
+
 def sign(x):
     """ Returns 1.0 if x positive, -1.0 otherwise"""
     return 1.0 if x > 0.0 else -1.0
@@ -107,8 +115,9 @@ def prepare_GL():
 
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective(45.0, 1.3333, 0.2, 10.0)
+    gluPerspective(45.0, 1.3333, 0.2, 10.0)    
     #gluPerspective(55.0, 1.3333, 0.5, 20.0)
+    #gluPerspective(25.0, 1.3333, 0.0, 20.0)
 
     glViewport(0, 0, 640, 480)
 
@@ -124,7 +133,7 @@ def prepare_GL():
     glColor3f(0.8, 0.8, 0.8)
 
     #gluLookAt(1.5, 3.5, 3.5, -0.5, 1.0, 0.0, 0.0, 1.5, 0.0)
-    gluLookAt(1.5, 4.0, 3.0, 0.5, 1.0, 0.0, 0.0, 1.0, 0.0)
+    gluLookAt(1.5, 4.0, 3.0, 0.5, 1.0, 0.0, 0.0, 1.5, 0.0)    
 
 
 def createCapsule(world, space, density, length, radius):

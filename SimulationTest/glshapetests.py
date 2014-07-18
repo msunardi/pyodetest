@@ -196,22 +196,34 @@ def near_callback(args, geom1, geom2):
     # Check if the objects collide
     contacts = ode.collide(geom1, geom2)
 
+    # Create contact joints
+    world, contactgroup = args
+    for c in contacts:
+        c.setBounce(0.2)
+        c.setMu(500)    # 0-5: very slippery, 50-500: normal, 5000: very sticky
+        j = ode.ContactJoint(world, contactgroup, c)
+        j.attach(geom1.getBody(), geom2.getBody())
 
-# intialize GLUT
-glutInit([])
-glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE)
+def init_GLUT():        
+    # intialize GLUT
+    glutInit([])
+    glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE)
 
-# Create the program window
+    # Create the program window
 
-screenwidth = gsm(0)
-screenheight = gsm(1)
-width = 800
-height = 600
-x = (screenwidth - width)/2
-y = (screenheight - height)/2
-glutInitWindowPosition(x, y)
-glutInitWindowSize(width, height)
-glutCreateWindow("PyODE Ragdoll Simulation")
+    screenwidth = gsm(0)
+    screenheight = gsm(1)
+    width = 800
+    height = 600
+    x = (screenwidth - width)/2
+    y = (screenheight - height)/2
+    glutInitWindowPosition(x, y)
+    glutInitWindowSize(width, height)
+    glutCreateWindow("PyODE Ragdoll Simulation")
+
+    glutKeyboardFunc(onKey)
+    glutDisplayFunc(onDraw)
+    glutIdleFunc(onIdle)
 
 # Create an ODE world object
 world = ode.World()
@@ -239,21 +251,20 @@ contactgroup = ode.JointGroup()
 fps = 60
 dt = 1.0 / fps
 stepsPerFrame = 2
-SloMo = 1
+SloMo = 7
 Paused = True
 lasttime = time.time()
 numiter = 0
 
-ragdoll = TestFigure(world, space, 500, (0.0, 3.0, 0.0))
+ragdoll = TestFigure(world, space, 500, (0.0, 1.4, 0.0))
 ragdoll.createBody()
 print "Total mass is %.1f kg (%.1f lbs)" % (ragdoll.totalMass, ragdoll.totalMass * 2.2)
 print "Ragdoll geoms: %d" % (len(ragdoll.geoms))
 
-glutKeyboardFunc(onKey)
-glutDisplayFunc(onDraw)
-glutIdleFunc(onIdle)
+
 
 def main():
+    init_GLUT()
     # Enter the GLUT event loop
     glutMainLoop()
 #exit()
