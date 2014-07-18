@@ -177,6 +177,9 @@ def create_box(world, space, density, lx, ly, lz):
 
     return body, geom
 
+# Polygon resolution for capsule bodies
+CAPSULE_SLICES = 16
+CAPSULE_STACKS = 12
 def draw_body(body):
     """ Draw an ODE body """
     

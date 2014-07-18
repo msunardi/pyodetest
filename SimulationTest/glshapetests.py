@@ -122,7 +122,7 @@ class TestFigure(Fubar):
         NECK_H = 1.50
         TOP_PLATE_DIM = (1.0, 0.75, 0.02)
 
-        self.head = self.addBody((0.0, BROW_H, 0.0), (0.0, MOUTH_H, 0.0), 0.11)
+        self.head = self.addBody((0.0, BROW_H, 0.0), (0.0, MOUTH_H, 0.0), 0.11, shape='cylinder')
         #self.neck = self.addBallJoint(self.chest, self.head, (0.0, NECK_H, 0.0))
         self.topPlate = self.addBody((0.0, 1.5, 0.0), (0.0, 1.2, 0.0), 0.2, dimension=TOP_PLATE_DIM)
         #return super(TestFigure, self).defineBody()        
@@ -261,7 +261,14 @@ ragdoll.createBody()
 print "Total mass is %.1f kg (%.1f lbs)" % (ragdoll.totalMass, ragdoll.totalMass * 2.2)
 print "Ragdoll geoms: %d" % (len(ragdoll.geoms))
 
-
+# create an obstacle
+obstacle, obsgeom = createCapsule(world, space, 1000, 0.05, 0.15)
+pos = (random.uniform(-0.3, 0.3), 0.2, random.uniform(-0.15, 0.2))
+#pos = (0.27396178783269359, 0.20000000000000001, 0.17531818795388002)
+obstacle.setPosition(pos)
+obstacle.setRotation(rightRot)
+bodies.append(obstacle)
+print "obstacle created at %s" % (str(pos))
 
 def main():
     init_GLUT()
