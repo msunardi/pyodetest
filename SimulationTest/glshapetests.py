@@ -19,7 +19,7 @@ class Fubar():
 
         self.offset = offset
         
-    def defineBody(self):
+    def createBody(self):
         pass
         
     def addBody(self, p1, p2, radius, dimension=(1.4, 0.1, 0.2), shape="block"):
@@ -29,6 +29,7 @@ class Fubar():
         p2 = add3(p2, self.offset)
         
         if (shape == "cylinder"):
+            print "Creating cylinder ..."
             dist = dist3(p1, p2) - radius
             body = ode.Body(world)
             m = ode.Mass()        
@@ -45,6 +46,7 @@ class Fubar():
             geom = ode.GeomCCylinder(self.space, radius, dist)
             geom.setBody(body)
         else:
+            print "Creating non-cylinder ..."
             dist = dist3(p1, p2)
             #lx = dist
             lx = dimension[0]                        
@@ -114,60 +116,16 @@ class Fubar():
 
 class TestFigure(Fubar):
 
-    def defineBody(self):
+    def createBody(self):
         BROW_H = 1.68
         MOUTH_H = 1.53
         NECK_H = 1.50
+        TOP_PLATE_DIM = (1.0, 0.75, 0.02)
+
         self.head = self.addBody((0.0, BROW_H, 0.0), (0.0, MOUTH_H, 0.0), 0.11)
-        self.neck = self.addBallJoint(self.chest, self.head, (0.0, NECK_H, 0.0))
-        return super(TestFigure, self).defineBody()        
-
-# intialize GLUT
-glutInit([])
-glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE)
-
-# Create the program window
-
-screenwidth = gsm(0)
-screenheight = gsm(1)
-width = 800
-height = 600
-x = (screenwidth - width)/2
-y = (screenheight - height)/2
-glutInitWindowPosition(x, y)
-glutInitWindowSize(width, height)
-glutCreateWindow("PyODE Ragdoll Simulation")
-
-# Create an ODE world object
-world = ode.World()
-world.setGravity((0.0, -9.81, 0.0))
-world.setERP(0.3)
-world.setCFM(1E-5)
-
-# Create an ODE space object
-space = ode.Space()
-
-# Create a plane geom to simulate a floor
-floor = ode.GeomPlane(space, (0,1,0), 0)
-
-# Create a list to store any ODE bofies which are not part of the
-# ragdoll. (this is needed to avoid Python garbage collecting these bodies)
-bodies = []
-
-ragdoll = TestFigure(world, space, 500, (0.0, 1.4, 0.0))
-
-# Create a joint group for the contact joints generated during collisions
-# between two bodies collide
-contactgroup = ode.JointGroup()
-
-# Simulation parameters
-fps = 60
-dt = 1.0 / fps
-stepsPerFrame = 2
-SloMo = 1
-Paused = False
-lasttime = time.time()
-numiter = 0
+        #self.neck = self.addBallJoint(self.chest, self.head, (0.0, NECK_H, 0.0))
+        self.topPlate = self.addBody((0.0, 1.5, 0.0), (0.0, 1.2, 0.0), 0.2, dimension=TOP_PLATE_DIM)
+        #return super(TestFigure, self).defineBody()        
 
 def onKey(c, x, y):
     """  GLUT keyboard callback """
@@ -226,11 +184,6 @@ def onIdle():
 
     lasttime = time.time()
 
-glutKeyboardFunc(onKey)
-glutDisplayFunc(onDraw)
-glutIdleFunc(onIdle)
-
-
 """ OTHER Methods """
 def near_callback(args, geom1, geom2):
     """Callback function for the collide() method
@@ -243,6 +196,62 @@ def near_callback(args, geom1, geom2):
     # Check if the objects collide
     contacts = ode.collide(geom1, geom2)
 
+
+# intialize GLUT
+glutInit([])
+glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE)
+
+# Create the program window
+
+screenwidth = gsm(0)
+screenheight = gsm(1)
+width = 800
+height = 600
+x = (screenwidth - width)/2
+y = (screenheight - height)/2
+glutInitWindowPosition(x, y)
+glutInitWindowSize(width, height)
+glutCreateWindow("PyODE Ragdoll Simulation")
+
+# Create an ODE world object
+world = ode.World()
+world.setGravity((0.0, -9.81, 0.0))
+world.setERP(0.3)
+world.setCFM(1E-5)
+
+# Create an ODE space object
+space = ode.Space()
+
+# Create a plane geom to simulate a floor
+floor = ode.GeomPlane(space, (0,1,0), 0)
+
+# Create a list to store any ODE bofies which are not part of the
+# ragdoll. (this is needed to avoid Python garbage collecting these bodies)
+bodies = []
+
+
+# Create a joint group for the contact joints generated during collisions
+# between two bodies collide
+contactgroup = ode.JointGroup()
+
+
+# Simulation parameters
+fps = 60
+dt = 1.0 / fps
+stepsPerFrame = 2
+SloMo = 1
+Paused = True
+lasttime = time.time()
+numiter = 0
+
+ragdoll = TestFigure(world, space, 500, (0.0, 3.0, 0.0))
+ragdoll.createBody()
+print "Total mass is %.1f kg (%.1f lbs)" % (ragdoll.totalMass, ragdoll.totalMass * 2.2)
+print "Ragdoll geoms: %d" % (len(ragdoll.geoms))
+
+glutKeyboardFunc(onKey)
+glutDisplayFunc(onDraw)
+glutIdleFunc(onIdle)
 
 def main():
     # Enter the GLUT event loop

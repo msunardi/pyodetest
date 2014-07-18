@@ -107,8 +107,8 @@ def prepare_GL():
 
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    #gluPerspective(45.0, 1.3333, 0.2, 20.0)
-    gluPerspective(55.0, 1.3333, 0.5, 20.0)
+    gluPerspective(45.0, 1.3333, 0.2, 10.0)
+    #gluPerspective(55.0, 1.3333, 0.5, 20.0)
 
     glViewport(0, 0, 640, 480)
 
@@ -123,8 +123,8 @@ def prepare_GL():
     glEnable(GL_COLOR_MATERIAL)
     glColor3f(0.8, 0.8, 0.8)
 
-    gluLookAt(1.5, 3.5, 3.5, -0.5, 1.0, 0.0, 0.0, 1.5, 0.0)
-    #gluLookAt(1.5, 4.0, 3.0, 0.5, 1.0, 0.0, 0.0, 1.0, 0.0)
+    #gluLookAt(1.5, 3.5, 3.5, -0.5, 1.0, 0.0, 0.0, 1.5, 0.0)
+    gluLookAt(1.5, 4.0, 3.0, 0.5, 1.0, 0.0, 0.0, 1.0, 0.0)
 
 
 def createCapsule(world, space, density, length, radius):
@@ -167,3 +167,41 @@ def create_box(world, space, density, lx, ly, lz):
     geom.setBody(body)
 
     return body, geom
+
+def draw_body(body):
+    """ Draw an ODE body """
+    
+    #glPushMatrix()
+    if body.shape == "capsule":
+        rot = makeOpenGLMatrix(body.getRotation(), body.getPosition())
+        glPushMatrix()
+        glMultMatrixd(rot)
+        cylHalfHeight = body.length / 2.0
+        glBegin(GL_QUAD_STRIP)
+        for i in range(0, CAPSULE_SLICES + 1):
+            angle = i / float(CAPSULE_SLICES) * 2.0 * pi
+            ca = cos(angle)
+            sa = sin(angle)
+            glNormal3f(ca, sa, 0)
+            glVertex3f(body.radius * ca, body.radius * sa, cylHalfHeight)
+            glVertex3f(body.radius * ca, body.radius * sa, -cylHalfHeight)
+
+        glEnd()
+        glTranslated(0, 0, cylHalfHeight)
+        
+        glutSolidSphere(body.radius, CAPSULE_SLICES, CAPSULE_STACKS)
+        glTranslated(0, 0, -2.0 * cylHalfHeight)
+        glutSolidSphere(body.radius, CAPSULE_SLICES, CAPSULE_STACKS)
+    elif body.shape == "block":
+        x,y,z = body.getPosition()
+        R = body.getRotation()
+        rot = [R[0], R[3], R[6], 0.,
+               R[1], R[4], R[7], 0.,
+               R[2], R[5], R[8], 0.,
+               x, y, z, 1.0]
+        glPushMatrix()
+        glMultMatrixd(rot)
+        sx, sy, sz = body.boxsize
+        glScalef(sx, sy, sz)
+        glutSolidCube(1)
+    glPopMatrix()
