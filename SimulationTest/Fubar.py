@@ -110,6 +110,20 @@ class Fubar():
 
         return joint
 
+    def addHingeJoint(self, body1, body2, anchor, axis, paramvel=3, paramfmax=30):
+        anchor = add3(anchor, self.offset)
+        joint = ode.HingeJoint(self.world)
+        joint.attach(body1, body2)
+        joint.setAnchor(anchor)
+        joint.setAxis(axis)
+        joint.setParam(ode.ParamVel, paramvel)
+        joint.setParam(ode.ParamFMax, paramfmax)
+
+        joint.style = "hinge"
+        self.joints.append(joint)
+
+        return joint
+
     def update(self):
         pass
 
