@@ -28,6 +28,10 @@ class Fubar():
         p2 = add3(p2, self.offset)
         
         if (shape == "cylinder"):
+            """
+            Creating cylinder works fine:
+            - object position is as expected
+            """
             print "Creating cylinder ..."
             dist = dist3(p1, p2) - radius
             body = ode.Body(self.world)
@@ -45,6 +49,10 @@ class Fubar():
             geom = ode.GeomCCylinder(self.space, radius, dist)
             geom.setBody(body)
         else:
+            """
+            Creating non-cylinder doesn't work well:
+            - position and orientation are messed up
+            """
             print "Creating non-cylinder ..."
             dist = dist3(p1, p2)
             #lx = dist
@@ -110,7 +118,45 @@ class Fubar():
 
         return joint
 
-    def addHingeJoint(self, body1, body2, anchor, axis, paramvel=3, paramfmax=30):
+    def addEnhancedBallJoint(self, body1, body2, anchor, baseAxis, baseTwistUp, 
+                             flexLimit=pi, twistLimit=pi, flexForce=0.0, twistForce=0.0):
+        """
+        Source: http://www.monsterden.net/software/ragdoll-pyode-tutorial
+        """
+        anchor = add3(anchor, self.offset)
+
+        #create the joint
+        joint = ode.BallJoint(self.world)
+        joint.attach(body1, body2)
+        joint.setAnchor(anchor)
+
+        # store the base orientation of the joint in the local coordinate system
+        #   of the primary body (because baseAxis and baseTwistUp may not be
+        #   orthogonal, the nearest vector to baseTwistUp but orthogonal to
+        #   baseAxis is calculated and stored with the joint)
+        joint.baseAxis = getBodyRelVec(body1, baseAxis)
+        tempTwistUp = getBodyRelVec(body1, baseTwistUp)
+        baseSide = norm3(cross(tempTwistUp, joint.baseAxis))
+        joint.baseTwistUp = norm3(cross(joint.baseAxis, baseSide))
+        
+        # store the base twist up vector (original version) in the local
+        #   coordinate system of the secondary body
+        joint.baseTwistUp2 = getBodyRelVec(body2, baseTwistUp)
+        
+        # store joint rotation limits and resistive force factors
+        joint.flexLimit = flexLimit
+        joint.twistLimit = twistLimit
+        joint.flexForce = flexForce
+        joint.twistForce = twistForce
+        
+        joint.style = "ball"
+        self.joints.append(joint)
+        
+        return joint
+
+
+    def addHingeJoint(self, body1, body2, anchor, axis, paramvel=3, paramfmax=30,
+                      loStop=-ode.Infinity, hiStop=ode.Infinity):
         anchor = add3(anchor, self.offset)
         joint = ode.HingeJoint(self.world)
         joint.attach(body1, body2)
@@ -118,6 +164,8 @@ class Fubar():
         joint.setAxis(axis)
         joint.setParam(ode.ParamVel, paramvel)
         joint.setParam(ode.ParamFMax, paramfmax)
+        joint.setParam(ode.ParamLoStop, loStop)
+        joint.setParam(ode.ParamHiStop, hiStop)
 
         joint.style = "hinge"
         self.joints.append(joint)

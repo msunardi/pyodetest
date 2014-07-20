@@ -13,6 +13,13 @@ leftRot = (0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0)
 upRot = (1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0, 0.0)
 downRot = (1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0, 0.0)
 bkwdRot = (1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
+# axes used to determine constrained joint rotations
+rightAxis = (1.0, 0.0, 0.0)
+leftAxis = (-1.0, 0.0, 0.0)
+upAxis = (0.0, 1.0, 0.0)
+downAxis = (0.0, -1.0, 0.0)
+bkwdAxis = (0.0, 0.0, 1.0)
+fwdAxis = (0.0, 0.0, -1.0)
 
 def sign(x):
     """ Returns 1.0 if x positive, -1.0 otherwise"""
@@ -217,3 +224,10 @@ def draw_body(body):
         glScalef(sx, sy, sz)
         glutSolidCube(1)
     glPopMatrix()
+
+def getBodyRelVec(b, v):
+    """
+    Returns the 3-vector v transformed into the local coordinate system of ODE
+    body b.
+    """
+    return rotate3(invert3x3(b.getRotation()), v) 

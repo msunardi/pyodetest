@@ -10,10 +10,35 @@ class TestFigure(Fubar):
         NECK_H = 1.50
         TOP_PLATE_DIM = (1.0, 0.75, 0.02)
 
-        self.head = self.addBody((0.0, BROW_H, 0.0), (0.0, MOUTH_H, 0.0), 0.11, shape='cylinder')
-        self.topPlate = self.addBody((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), 0.3, dimension=(1.0, 0.1, 0.1))
-        self.addHingeJoint(self.topPlate, ode.environment, (0,0.5,0), (1,0,0))
+        SHOULDER_W = 0.41
+        SHOULDER_H = 1.37
+        UPPER_ARM_LEN = 0.30
+        FORE_ARM_LEN = 0.25
+        CHEST_H = 1.35
+        CHEST_W = 0.36
 
+        R_SHOULDER_POS = (-SHOULDER_W * 0.5, SHOULDER_H, 0.0)
+        R_ELBOW_POS = sub3(R_SHOULDER_POS, (UPPER_ARM_LEN, 0.0, 0.0))
+        R_WRIST_POS = sub3(R_ELBOW_POS, (FORE_ARM_LEN, 0.0, 0.0))
+
+        self.chest = self.addBody((-CHEST_W * 0.5, CHEST_H, 0.0),
+			(CHEST_W * 0.5, CHEST_H, 0.0), 0.13, shape="cylinder")
+        self.addFixedJoint(ode.environment, self.chest)
+        self.head = self.addBody((0.0, BROW_H, 0.0), (0.0, MOUTH_H, 0.0), 0.11, shape='cylinder')
+        #self.topArm = self.addBody((0.0, 0.0, 0.0), (0.1, 0.0, 0.0), 0.3, dimension=(1.0, 0.1, 0.1))
+        self.topArm = self.addBody(R_SHOULDER_POS, R_ELBOW_POS, 0.08, shape="cylinder")#, dimension=(1.0, 0.1, 0.1))
+        #self.rightShoulder = self.addBallJoint(self.chest, self.rightUpperArm,
+        #	R_SHOULDER_POS)
+
+        #self.addHingeJoint(ode.environment, self.topArm, (0, 0.5 ,0), (1, 0, 0))
+        #self.addHingeJoint(self.chest, self.topArm, R_SHOULDER_POS, rightAxis)
+        self.addBallJoint(self.chest, self.topArm, R_SHOULDER_POS)
+        #self.addEnhancedBallJoint(self.chest, self.topArm, R_SHOULDER_POS, norm3((-1.0, -1.0, 4.0)), (0.0, 0.0, 1.0), pi * 0.5, 
+        #                          pi * 0.25, 150.0, 100.0)
+        self.lowArm = self.addBody(R_ELBOW_POS, R_WRIST_POS, 0.075, shape="cylinder")#, dimension=(1.0, 0.1, 0.1))
+        #self.addBallJoint(self.topArm, self.lowArm, R_ELBOW_POS)
+        self.addHingeJoint(self.topArm,
+			self.lowArm, R_ELBOW_POS, downAxis, loStop=0.0, hiStop=0.6 * pi)
         """
         j1 = ode.HingeJoint(self.world)
         j1.attach(self.head, ode.environment)
@@ -309,7 +334,7 @@ contactgroup = ode.JointGroup()
 fps = 60
 dt = 1.0 / fps
 stepsPerFrame = 2
-SloMo = 7
+SloMo = 1
 Paused = True
 lasttime = time.time()
 numiter = 0
