@@ -27,6 +27,7 @@
     <Compile Include="Fubar.py" />
     <Compile Include="glode.py" />
     <Compile Include="glshapetests.py" />
+    <Compile Include="glutUI.py" />
     <Compile Include="SimulationTest.py" />
     <Compile Include="vpython_test.py" />
   </ItemGroup>
