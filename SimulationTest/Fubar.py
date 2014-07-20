@@ -105,13 +105,19 @@ class Fubar():
 
         return joint
 
-    def addBallJoint(self, body1, body2, anchor):
+    def addBallJoint(self, body1, body2, anchor, pv=3, pf=30,
+                     loStop=-ode.Infinity, hiStop=ode.Infinity):
         anchor = add3(anchor, self.offset)
 
         # Create the joint
         joint = ode.BallJoint(self.world)
         joint.attach(body1, body2)
         joint.setAnchor(anchor)
+
+        joint.setParam(ode.ParamVel, pv)
+        joint.setParam(ode.ParamFMax, pf)
+        joint.setParam(ode.ParamLoStop, loStop)
+        joint.setParam(ode.ParamHiStop, hiStop)
 
         joint.style = "ball"
         self.joints.append(joint)
