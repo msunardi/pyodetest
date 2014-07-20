@@ -13,13 +13,15 @@ class TestFigure(Fubar):
         SHOULDER_W = 0.41
         SHOULDER_H = 1.37
         UPPER_ARM_LEN = 0.75#0.30
-        FORE_ARM_LEN = 0.50#0.25
+        FORE_ARM_LEN = 0.65#0.25
         CHEST_H = 1.35
         CHEST_W = 0.36
 
         R_SHOULDER_POS = (-SHOULDER_W * 0.5, SHOULDER_H, 0.0)
-        R_ELBOW_POS = sub3(R_SHOULDER_POS, (UPPER_ARM_LEN, 0.0, 0.0))
-        R_WRIST_POS = sub3(R_ELBOW_POS, (FORE_ARM_LEN, 0.0, 0.0))
+        #R_ELBOW_POS = sub3(R_SHOULDER_POS, (UPPER_ARM_LEN, 0.0, 0.0))
+        #R_WRIST_POS = sub3(R_ELBOW_POS, (FORE_ARM_LEN, 0.0, 0.0))
+        R_ELBOW_POS = sub3(R_SHOULDER_POS, (0.0, UPPER_ARM_LEN, 0.0))
+        R_WRIST_POS = sub3(R_ELBOW_POS, (0.0, FORE_ARM_LEN, 0.0))
 
         #self.chest = self.addBody((-CHEST_W * 0.5, CHEST_H, 0.0),
 		#	(CHEST_W * 0.5, CHEST_H, 0.0), 0.13, shape="cylinder")
@@ -33,12 +35,12 @@ class TestFigure(Fubar):
         #self.addHingeJoint(ode.environment, self.topArm, (0, 0.5 ,0), (1, 0, 0))
         #self.addHingeJoint(self.chest, self.topArm, R_SHOULDER_POS, rightAxis)
         #self.addBallJoint(ode.environment, self.topArm, R_SHOULDER_POS, loStop=0.0, hiStop=0.6 * pi)
-        self.addHingeJoint(ode.environment, self.topArm, R_SHOULDER_POS, downAxis, loStop=0.0, hiStop=0.6 * pi)
+        self.addHingeJoint(ode.environment, self.topArm, R_SHOULDER_POS, leftAxis, paramfmax=50, loStop=0.0, hiStop=pi)
         #self.addEnhancedBallJoint(self.chest, self.topArm, R_SHOULDER_POS, norm3((-1.0, -1.0, 4.0)), (0.0, 0.0, 1.0), pi * 0.5, 
         #                          pi * 0.25, 150.0, 100.0)
         self.lowArm = self.addBody(R_ELBOW_POS, R_WRIST_POS, 0.075, shape="cylinder")#, dimension=(1.0, 0.1, 0.1))
         #self.addBallJoint(self.topArm, self.lowArm, R_ELBOW_POS)
-        self.addHingeJoint(self.topArm, self.lowArm, R_ELBOW_POS, downAxis, 
+        self.addHingeJoint(self.topArm, self.lowArm, R_ELBOW_POS, leftAxis, 
                            paramvel=0.0, paramfmax=0.0, loStop=0.0, hiStop=0.6 * pi)
         """
         j1 = ode.HingeJoint(self.world)
