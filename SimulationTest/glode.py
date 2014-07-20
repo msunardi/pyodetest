@@ -11,8 +11,9 @@ class TestFigure(Fubar):
         TOP_PLATE_DIM = (1.0, 0.75, 0.02)
 
         self.head = self.addBody((0.0, BROW_H, 0.0), (0.0, MOUTH_H, 0.0), 0.11, shape='cylinder')
-        self.topPlate = self.addBody((0.0, 1.5, 0.0), (0.0, 1.2, 0.0), 0.2, dimension=TOP_PLATE_DIM)
-        self.addHingeJoint(self.topPlate, ode.environment, (0,2,0), (0,0,1))
+        self.topPlate = self.addBody((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), 0.3, dimension=(1.0, 0.1, 0.1))
+        self.addHingeJoint(self.topPlate, ode.environment, (0,0.5,0), (1,0,0))
+
         """
         j1 = ode.HingeJoint(self.world)
         j1.attach(self.head, ode.environment)
