@@ -2,6 +2,30 @@ from common_utils import *
 from win32api import GetSystemMetrics as gsm
 from Fubar import Fubar
 
+Torque_incr = 5.3333
+FMax_incr = 10.5
+
+# GUI Params
+g_fViewDistance = 9.
+g_Width = 800
+g_Height = 600
+
+g_nearPlane = 1.
+g_farPlane = 1000.
+
+action = ""
+xStart = yStart = 0.
+zoom = 65.
+
+xRotate = 0.
+yRotate = 0.
+zRotate = 0.
+
+xTrans = 0.
+yTrans = 0.
+
+
+
 class TestFigure(Fubar):
 
     def createBody(self):
@@ -35,12 +59,12 @@ class TestFigure(Fubar):
         #self.addHingeJoint(ode.environment, self.topArm, (0, 0.5 ,0), (1, 0, 0))
         #self.addHingeJoint(self.chest, self.topArm, R_SHOULDER_POS, rightAxis)
         #self.addBallJoint(ode.environment, self.topArm, R_SHOULDER_POS, loStop=0.0, hiStop=0.6 * pi)
-        self.addHingeJoint(ode.environment, self.topArm, R_SHOULDER_POS, leftAxis, paramfmax=50, loStop=0.0, hiStop=pi)
+        self.shoulder = self.addHingeJoint(ode.environment, self.topArm, R_SHOULDER_POS, fwdAxis, paramvel=0, paramfmax=50, loStop=-0.8*pi, hiStop=0.9*pi)
         #self.addEnhancedBallJoint(self.chest, self.topArm, R_SHOULDER_POS, norm3((-1.0, -1.0, 4.0)), (0.0, 0.0, 1.0), pi * 0.5, 
         #                          pi * 0.25, 150.0, 100.0)
         self.lowArm = self.addBody(R_ELBOW_POS, R_WRIST_POS, 0.075, shape="cylinder")#, dimension=(1.0, 0.1, 0.1))
         #self.addBallJoint(self.topArm, self.lowArm, R_ELBOW_POS)
-        self.addHingeJoint(self.topArm, self.lowArm, R_ELBOW_POS, leftAxis, 
+        self.addHingeJoint(self.topArm, self.lowArm, R_ELBOW_POS, fwdAxis, 
                            paramvel=0.0, paramfmax=0.0, loStop=0.0, hiStop=0.6 * pi)
         """
         j1 = ode.HingeJoint(self.world)
@@ -63,7 +87,7 @@ def onKey(c, x, y):
         Paused = not Paused
     # quit
     elif c == 'q' or c == 'Q':
-        sys.exit(0)
+        sys.exit(0)   
 
 
 def onDraw():
@@ -100,6 +124,16 @@ def onIdle():
         world.step(dt / stepsPerFrame / SloMo)
 
         numiter += 1
+
+        try:
+            ragdoll.shoulder.setParam(ode.ParamVel, Torque)            
+        except:
+            print("Failed adding torque to shoulder")
+
+        try:
+            ragdoll.shoulder.setParam(ode.ParamFMax, FMax)
+        except:
+            print("Failed increasing FMax to shoulder")
 
         # apply internal ragdoll forces
         ragdoll.update()
@@ -150,25 +184,6 @@ def init_GLUT():
     glutDisplayFunc(onDraw)
     glutIdleFunc(onIdle)
 
-g_fViewDistance = 9.
-g_Width = 800
-g_Height = 600
-
-g_nearPlane = 1.
-g_farPlane = 1000.
-
-action = ""
-xStart = yStart = 0.
-zoom = 65.
-
-xRotate = 0.
-yRotate = 0.
-zRotate = 0.
-
-xTrans = 0.
-yTrans = 0.
-
-
 """UI control: http://carloluchessa.blogspot.com/2012/09/simple-viewer-in-pyopengl.html"""
 def init():
     glEnable(GL_NORMALIZE)
@@ -202,7 +217,7 @@ def resetView():
 def display():
     # Clear frame buffer and depth buffer
     #glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    #glClearColor(0.8, 0.8, 0.9, 0.0)
+    glClearColor(0.8, 0.8, 0.9, 0.0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glEnable(GL_DEPTH_TEST)
     glEnable(GL_LIGHTING)
@@ -239,7 +254,8 @@ def polarView():
    
 def keyboard(key, x, y):
     """  GLUT keyboard callback """
-    global zTr, yTr, xTr, SloMo, Paused
+    global zTr, yTr, xTr, SloMo, Paused, Torque, FMax
+
     if(key=='r'): resetView()
     if(key=='q' or key == 'Q'): sys.exit(0)    
     
@@ -250,7 +266,19 @@ def keyboard(key, x, y):
     if key == 'p' or key == 'P':
         Paused = not Paused
         print "Paused: %s" % (Paused)
-    
+    # Add torque to shoulder joint:
+    elif key == 's':
+        print("Increasing torque to: %s" % Torque)
+        Torque += Torque_incr
+    elif key == 'd':
+        print("Decreasing torque to: %s" % Torque)
+        Torque -= Torque_incr
+    elif key == 'w':
+        print("Increasing FMax to: %s" % FMax)
+        FMax += FMax_incr
+    elif key == 'W':
+        print("Decreasing FMax to: %s" % FMax)
+        FMax -= FMax_incr
     glutPostRedisplay()
 
 
@@ -332,7 +360,6 @@ bodies = []
 # between two bodies collide
 contactgroup = ode.JointGroup()
 
-
 # Simulation parameters
 fps = 60
 dt = 1.0 / fps
@@ -341,6 +368,8 @@ SloMo = 1
 Paused = True
 lasttime = time.time()
 numiter = 0
+Torque = 0.0
+FMax = 30.0
 
 ragdoll = TestFigure(world, space, 500, (0.0, 1.4, 0.0))
 ragdoll.createBody()
